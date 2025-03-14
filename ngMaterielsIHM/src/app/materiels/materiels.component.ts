@@ -1,90 +1,139 @@
-import { Component } from '@angular/core';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatTableModule } from '@angular/material/table';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { NgFor, NgIf } from '@angular/common';
-import { MaterielDialogComponent } from '../materiel-dialog/materiel-dialog.component';
+import { Component, OnInit, inject } from '@angular/core';
+import {
+  FormGroup,
+  FormControl,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { MockAPIRequestService } from '../mock-api-request.service';
+import { Observable, firstValueFrom } from 'rxjs';
+
+interface Materiel {
+  id: number;
+  nom: string;
+  description: string;
+  serviceDat: string;
+  endGarantee: string;
+}
 
 @Component({
   selector: 'app-materiels',
   standalone: true,
-  imports: [
-    MatTableModule,
-    MatButtonModule,
-    MatIconModule,
-    MatDialogModule,
-    NgFor,
-    NgIf,
-  ],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './materiels.component.html',
   styleUrls: ['./materiels.component.css'],
 })
-export class MaterielsComponent {
-  displayedColumns: string[] = [
-    'id',
-    'name',
-    'serviceDat',
-    'endGarantee',
-    'proprietaireId',
-    'actions',
-  ];
-  materiels = new MatTableDataSource([
-    {
-      id: 1,
-      name: 'Ordinateur Dell',
-      serviceDat: '2024-01-01',
-      endGarantee: '2026-01-01',
-      proprietaireId: 3,
-    },
-    {
-      id: 2,
-      name: 'Imprimante HP',
-      serviceDat: '2023-07-15',
-      endGarantee: '2025-07-15',
-      proprietaireId: 2,
-    },
-  ]);
+export class MaterielsComponent implements OnInit {
+  materielForm: FormGroup;
+  materiels$: Observable<Materiel[]>; // ✅ Utilisation d'un Observable pour écouter les modifications
+  isEditMode = false;
+  currentEditedId: number | null = null;
 
-  constructor(private dialog: MatDialog) {}
+  private mockAPI = inject(MockAPIRequestService); // ✅ Injection propre en standalone
 
-  addMaterial() {
-    const dialogRef = this.dialog.open(MaterielDialogComponent, {
-      width: '400px',
-      data: {
-        id: null,
-        name: '',
-        serviceDat: '',
-        endGarantee: '',
-        proprietaireId: null,
-      },
+  constructor() {
+    this.materielForm = new FormGroup({
+      nom: new FormControl('', Validators.required),
+      description: new FormControl('', Validators.required),
+      serviceDat: new FormControl('', Validators.required),
+      endGarantee: new FormControl('', Validators.required),
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        result.id = this.materiels.data.length + 1;
-        this.materiels.data = [...this.materiels.data, result];
-      }
+    this.materiels$ = this.mockAPI.getMateriels();
+
+    // ✅ Met à jour la validation du formulaire à chaque changement
+    this.materielForm.valueChanges.subscribe(() => {
+      this.materielForm.updateValueAndValidity();
     });
   }
 
-  editMaterial(material: any) {
-    const dialogRef = this.dialog.open(MaterielDialogComponent, {
-      width: '400px',
-      data: material,
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        const index = this.materiels.data.findIndex((m) => m.id === result.id);
-        this.materiels.data[index] = result;
-        this.materiels.data = [...this.materiels.data]; // Mise à jour de la source de données
-      }
-    });
+  ngOnInit(): void {
+    this.materiels$ = this.mockAPI.getMateriels(); // ✅ On récupère les matériels au chargement
   }
 
-  deleteMaterial(id: number) {
-    this.materiels.data = this.materiels.data.filter((m) => m.id !== id);
+  /** ✅ Vérifie si le formulaire est valide */
+  isValidForm(): boolean {
+    const serviceDat = this.materielForm.get('serviceDat')?.value;
+    const endGarantee = this.materielForm.get('endGarantee')?.value;
+
+    if (!this.materielForm.valid || !serviceDat || !endGarantee) {
+      return false;
+    }
+
+    return new Date(endGarantee) > new Date(serviceDat);
+  }
+
+  /** ✅ Ajoute un matériel via le service */
+  onAdd() {
+    if (this.isValidForm()) {
+      const newMateriel: Materiel = {
+        id: 0, // L'ID sera défini par le service
+        nom: this.materielForm.get('nom')?.value ?? '',
+        description: this.materielForm.get('description')?.value ?? '',
+        serviceDat: this.materielForm.get('serviceDat')?.value ?? '',
+        endGarantee: this.materielForm.get('endGarantee')?.value ?? '',
+      };
+      this.mockAPI.addMateriel(newMateriel);
+      this.resetForm();
+    }
+  }
+
+  /** ✅ Passe en mode édition et charge les données */
+  onEdit(materiel: Materiel) {
+    this.materielForm.setValue({
+      nom: materiel.nom,
+      description: materiel.description,
+      serviceDat: materiel.serviceDat,
+      endGarantee: materiel.endGarantee,
+    });
+    this.isEditMode = true;
+    this.currentEditedId = materiel.id;
+  }
+
+  /** ✅ Met à jour un matériel via le service */
+  onUpdate() {
+    if (this.currentEditedId && this.isValidForm()) {
+      const confirmUpdate = window.confirm(
+        'Êtes-vous sûr de vouloir modifier ce matériel ?'
+      );
+      if (!confirmUpdate) return;
+
+      const updatedMateriel: Materiel = {
+        id: this.currentEditedId,
+        nom: this.materielForm.get('nom')?.value ?? '',
+        description: this.materielForm.get('description')?.value ?? '',
+        serviceDat: this.materielForm.get('serviceDat')?.value ?? '',
+        endGarantee: this.materielForm.get('endGarantee')?.value ?? '',
+      };
+      this.mockAPI.updateMateriel(updatedMateriel);
+      this.resetForm();
+    }
+  }
+
+  /** ✅ Supprime un matériel via le service */
+  onDelete(id: number) {
+    const confirmDelete = window.confirm(
+      'Êtes-vous sûr de vouloir supprimer ce matériel ?'
+    );
+    if (!confirmDelete) return;
+
+    this.mockAPI.deleteMateriel(id);
+  }
+
+  /** ✅ Réinitialise le formulaire et repasse en mode ajout */
+  resetForm() {
+    this.materielForm.reset();
+    this.isEditMode = false;
+    this.currentEditedId = null;
+  }
+
+  /** ✅ Soumission du formulaire */
+  onSubmit() {
+    if (this.isEditMode) {
+      this.onUpdate();
+    } else {
+      this.onAdd();
+    }
   }
 }
