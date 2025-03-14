@@ -1,0 +1,49 @@
+<h2>📦 Liste des Matériels</h2>
+
+<button mat-raised-button color="primary" (click)="addMaterial()">➕ Ajouter</button>
+
+<table mat-table [dataSource]="materiels.data" class="mat-elevation-z8">
+
+  <!-- ID Column -->
+  <ng-container matColumnDef="id">
+    <th mat-header-cell *matHeaderCellDef>ID</th>
+    <td mat-cell *matCellDef="let item">{{ item.id }}</td>
+  </ng-container>
+
+  <!-- Nom Column -->
+  <ng-container matColumnDef="name">
+    <th mat-header-cell *matHeaderCellDef>Nom</th>
+    <td mat-cell *matCellDef="let item">{{ item.name }}</td>
+  </ng-container>
+
+  <!-- Service Date Column -->
+  <ng-container matColumnDef="serviceDat">
+    <th mat-header-cell *matHeaderCellDef>Mise en service</th>
+    <td mat-cell *matCellDef="let item">{{ item.serviceDat }}</td>
+  </ng-container>
+
+  <!-- End Guarantee Column -->
+  <ng-container matColumnDef="endGarantee">
+    <th mat-header-cell *matHeaderCellDef>Fin de garantie</th>
+    <td mat-cell *matCellDef="let item">{{ item.endGarantee }}</td>
+  </ng-container>
+
+  <!-- Proprietaire ID Column -->
+  <ng-container matColumnDef="proprietaireId">
+    <th mat-header-cell *matHeaderCellDef>Propriétaire</th>
+    <td mat-cell *matCellDef="let item">{{ item.proprietaireId }}</td>
+  </ng-container>
+
+  <!-- Actions Column -->
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef>Actions</th>
+    <td mat-cell *matCellDef="let item">
+      <button mat-icon-button color="accent" (click)="editMaterial(item)">✏️</button>
+      <button mat-icon-button color="warn" (click)="deleteMaterial(item.id)">🗑️</button>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+</table>

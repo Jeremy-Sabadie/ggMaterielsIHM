@@ -1,0 +1,35 @@
+<h2 mat-dialog-title>📦 {{ data?.id ? 'Modifier' : 'Ajouter' }} un Matériel</h2>
+
+<mat-dialog-content class="mat-typography">
+  <form [formGroup]="materielForm">
+    <mat-form-field appearance="outline">
+      <mat-label>Nom du Matériel</mat-label>
+      <input matInput formControlName="name">
+      <mat-error *ngIf="materielForm.controls.name.invalid">Nom requis (max 50 caractères)</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Date de mise en service</mat-label>
+      <input matInput [matDatepicker]="pickerService" formControlName="serviceDat">
+      <mat-datepicker-toggle matSuffix [for]="pickerService"></mat-datepicker-toggle>
+      <mat-datepicker #pickerService></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Date de fin de garantie</mat-label>
+      <input matInput [matDatepicker]="pickerEnd" formControlName="endGarantee">
+      <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+      <mat-datepicker #pickerEnd></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>ID Propriétaire</mat-label>
+      <input matInput type="number" formControlName="proprietaireId">
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="close()">Annuler</button>
+  <button mat-raised-button color="primary" (click)="save()" [disabled]="materielForm.invalid">💾 Enregistrer</button>
+</mat-dialog-actions>
