@@ -6,16 +6,8 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { MockAPIRequestService } from '../mock-api-request.service';
-import { Observable, firstValueFrom } from 'rxjs';
-
-interface Materiel {
-  id: number;
-  nom: string;
-  description: string;
-  serviceDat: string;
-  endGarantee: string;
-}
+import { MaterielsService, Materiel } from '../services/materiels.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-materiels',
@@ -26,33 +18,31 @@ interface Materiel {
 })
 export class MaterielsComponent implements OnInit {
   materielForm: FormGroup;
-  materiels$: Observable<Materiel[]>; // ✅ Utilisation d'un Observable pour écouter les modifications
+  materiels$: Observable<Materiel[]>;
   isEditMode = false;
   currentEditedId: number | null = null;
 
-  private mockAPI = inject(MockAPIRequestService); // ✅ Injection propre en standalone
+  private materielsService = inject(MaterielsService);
 
   constructor() {
     this.materielForm = new FormGroup({
-      nom: new FormControl('', Validators.required),
+      name: new FormControl('', Validators.required),
       description: new FormControl('', Validators.required),
       serviceDat: new FormControl('', Validators.required),
       endGarantee: new FormControl('', Validators.required),
     });
 
-    this.materiels$ = this.mockAPI.getMateriels();
+    this.materiels$ = this.materielsService.getMateriels();
 
-    // ✅ Met à jour la validation du formulaire à chaque changement
     this.materielForm.valueChanges.subscribe(() => {
       this.materielForm.updateValueAndValidity();
     });
   }
 
   ngOnInit(): void {
-    this.materiels$ = this.mockAPI.getMateriels(); // ✅ On récupère les matériels au chargement
+    this.materiels$ = this.materielsService.getMateriels();
   }
 
-  /** ✅ Vérifie si le formulaire est valide */
   isValidForm(): boolean {
     const serviceDat = this.materielForm.get('serviceDat')?.value;
     const endGarantee = this.materielForm.get('endGarantee')?.value;
@@ -64,25 +54,25 @@ export class MaterielsComponent implements OnInit {
     return new Date(endGarantee) > new Date(serviceDat);
   }
 
-  /** ✅ Ajoute un matériel via le service */
   onAdd() {
     if (this.isValidForm()) {
       const newMateriel: Materiel = {
-        id: 0, // L'ID sera défini par le service
-        nom: this.materielForm.get('nom')?.value ?? '',
+        id: 0,
+        name: this.materielForm.get('name')?.value ?? '',
         description: this.materielForm.get('description')?.value ?? '',
         serviceDat: this.materielForm.get('serviceDat')?.value ?? '',
         endGarantee: this.materielForm.get('endGarantee')?.value ?? '',
       };
-      this.mockAPI.addMateriel(newMateriel);
-      this.resetForm();
+      this.materielsService.addMateriel(newMateriel).subscribe(() => {
+        this.materiels$ = this.materielsService.getMateriels();
+        this.resetForm();
+      });
     }
   }
 
-  /** ✅ Passe en mode édition et charge les données */
   onEdit(materiel: Materiel) {
     this.materielForm.setValue({
-      nom: materiel.nom,
+      name: materiel.name,
       description: materiel.description,
       serviceDat: materiel.serviceDat,
       endGarantee: materiel.endGarantee,
@@ -91,44 +81,46 @@ export class MaterielsComponent implements OnInit {
     this.currentEditedId = materiel.id;
   }
 
-  /** ✅ Met à jour un matériel via le service */
   onUpdate() {
     if (this.currentEditedId && this.isValidForm()) {
-      const confirmUpdate = window.confirm(
-        'Êtes-vous sûr de vouloir modifier ce matériel ?'
-      );
-      if (!confirmUpdate) return;
-
       const updatedMateriel: Materiel = {
         id: this.currentEditedId,
-        nom: this.materielForm.get('nom')?.value ?? '',
+        name: this.materielForm.get('name')?.value ?? '',
         description: this.materielForm.get('description')?.value ?? '',
         serviceDat: this.materielForm.get('serviceDat')?.value ?? '',
         endGarantee: this.materielForm.get('endGarantee')?.value ?? '',
       };
-      this.mockAPI.updateMateriel(updatedMateriel);
-      this.resetForm();
+      this.materielsService.updateMateriel(updatedMateriel).subscribe(() => {
+        this.materiels$ = this.materielsService.getMateriels();
+        this.resetForm();
+      });
     }
   }
 
-  /** ✅ Supprime un matériel via le service */
   onDelete(id: number) {
     const confirmDelete = window.confirm(
       'Êtes-vous sûr de vouloir supprimer ce matériel ?'
     );
     if (!confirmDelete) return;
 
-    this.mockAPI.deleteMateriel(id);
+    this.materielsService.deleteMateriel(id).subscribe(() => {
+      this.materiels$ = this.materielsService.getMateriels();
+    });
   }
 
-  /** ✅ Réinitialise le formulaire et repasse en mode ajout */
   resetForm() {
     this.materielForm.reset();
     this.isEditMode = false;
     this.currentEditedId = null;
   }
 
-  /** ✅ Soumission du formulaire */
+  getButtonTooltip(): string {
+    if (!this.isValidForm()) {
+      return 'Veuillez remplir tous les champs et vérifier que la date de fin de garantie est postérieure à la date de mise en service.';
+    }
+    return '';
+  }
+
   onSubmit() {
     if (this.isEditMode) {
       this.onUpdate();

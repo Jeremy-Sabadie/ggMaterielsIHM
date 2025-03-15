@@ -1,22 +1,63 @@
-<mat-sidenav-container class="container">
-  <mat-sidenav #sidenav mode="side" opened>
-    <mat-toolbar>🖥️ Menu</mat-toolbar>
-    <mat-nav-list>
-      <button mat-button (click)="goTo('/materiels')">📦 Matériels</button>
-      <button mat-button (click)="goTo('/contracts')">📜 Contrats</button>
-    </mat-nav-list>
-  </mat-sidenav>
+import { Component, Inject } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import {
+  FormControl,
+  FormGroup,
+  Validators,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
-  <mat-sidenav-content>
-    <mat-toolbar color="primary">
-      <button mat-icon-button (click)="sidenav.toggle()">
-        <mat-icon>menu</mat-icon>
-      </button>
-      <span>Gestion des Matériels et Contrats</span>
-    </mat-toolbar>
+@Component({
+  selector: 'app-materiel-dialog',
+  standalone: true,
+  imports: [
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    FormsModule,
+    ReactiveFormsModule,
+  ],
+  templateUrl: './materiel-dialog.component.html',
+  styleUrls: ['./materiel-dialog.component.css'],
+})
+export class MaterielDialogComponent {
+  materielForm: FormGroup;
 
-    <main class="content">
-      <router-outlet></router-outlet>
-    </main>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+  constructor(
+    public dialogRef: MatDialogRef<MaterielDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any
+  ) {
+    this.materielForm = new FormGroup({
+      name: new FormControl(data?.name || '', [
+        Validators.required,
+        Validators.maxLength(50),
+      ]),
+      serviceDat: new FormControl(
+        data?.serviceDat || null,
+        Validators.required
+      ),
+      endGarantee: new FormControl(data?.endGarantee || null),
+      proprietaireId: new FormControl(data?.proprietaireId || null),
+    });
+  }
+
+  save() {
+    if (this.materielForm.valid) {
+      this.dialogRef.close(this.materielForm.value);
+    }
+  }
+
+  close() {
+    this.dialogRef.close();
+  }
+}

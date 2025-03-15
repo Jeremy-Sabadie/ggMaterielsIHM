@@ -45,7 +45,7 @@
     <tbody>
       <tr *ngFor="let materiel of materiels$ | async">
         <td>{{ materiel.id }}</td>
-        <td>{{ materiel.nom }}</td>
+        <td>{{ materiel.name }}</td>
         <td>{{ materiel.description }}</td>
         <td>{{ materiel.serviceDat | date: 'dd/MM/yyyy' }}</td>
         <td>{{ materiel.endGarantee | date: 'dd/MM/yyyy' }}</td>
