@@ -1,0 +1,14 @@
+{
+  "/api": {
+    "target": "http://sabadiedev.fr:32769",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": { "^/api": "" },
+    "headers": {
+      "Origin": "http://localhost:4200",
+      "Access-Control-Request-Method": "GET, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Request-Headers": "Content-Type, Authorization"
+    }
+  }
+}

@@ -1,36 +1,44 @@
 <div class="container">
   <h1>Gestion des Contrats</h1>
 
+  <!-- ✅ Formulaire d'ajout / modification -->
   <form [formGroup]="contractForm" (ngSubmit)="onSubmit()">
     <div class="form-group">
       <label for="name">Nom du Contrat</label>
-      <input id="name" formControlName="name" type="text" placeholder="Nom du contrat" />
+      <input id="name" formControlName="name" type="text" placeholder="Nom du contrat" required />
     </div>
 
     <div class="form-group">
       <label for="start_date">Date de Début</label>
-      <input id="start_date" formControlName="start_date" type="date" />
+      <input id="start_date" formControlName="start_date" type="date" required />
     </div>
 
     <div class="form-group">
       <label for="end_date">Date de Fin</label>
-      <input id="end_date" formControlName="end_date" type="date" />
+      <input id="end_date" formControlName="end_date" type="date" required />
     </div>
 
     <div class="button-group">
-      <button type="submit" [class.btn-success]="!isEditMode" [class.btn-warning]="isEditMode"
-        [class.btn-disabled]="!isValidForm()" [disabled]="!isValidForm()" [title]="getButtonTooltip()">
+      <button type="submit" [ngClass]="isEditMode ? 'btn-warning' : 'btn-success'" [disabled]="!isValidForm()"
+        [title]="getButtonTooltip()">
         {{ isEditMode ? 'Modifier' : 'Ajouter' }}
       </button>
       <button type="button" class="btn-info" (click)="resetForm()">Annuler</button>
     </div>
-
-    <p *ngIf="!isValidForm()" class="error-message">
-      ⚠️ Veuillez remplir tous les champs et vous assurer que la date de fin est postérieure à la date de début.
-    </p>
   </form>
 
-  <table>
+  <!-- ✅ Message si le formulaire est invalide -->
+  <p *ngIf="!isValidForm()" class="error-message">
+    ⚠️ Veuillez remplir tous les champs et vérifier que la date de fin est postérieure à la date de début.
+  </p>
+
+  <!-- ✅ Message si aucun contrat n'est disponible -->
+  <p *ngIf="!(contracts$ | async)?.length" class="no-data">
+    🚀 Aucun contrat trouvé !
+  </p>
+
+  <!-- ✅ Tableau des contrats -->
+  <table *ngIf="contracts$ | async as contracts">
     <thead>
       <tr>
         <th>ID</th>
@@ -41,16 +49,14 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let contract of contracts$ | async">
+      <tr *ngFor="let contract of contracts">
         <td>{{ contract.id }}</td>
         <td>{{ contract.name }}</td>
         <td>{{ contract.start_date | date: 'dd/MM/yyyy' }}</td>
         <td>{{ contract.end_date | date: 'dd/MM/yyyy' }}</td>
         <td class="actions">
-          <div class="action-buttons">
-            <button class="btn-warning" (click)="onEdit(contract)">Modifier</button>
-            <button class="btn-danger" (click)="onDelete(contract.id)">Supprimer</button>
-          </div>
+          <button class="btn-warning" (click)="onEdit(contract)">Modifier</button>
+          <button class="btn-danger" (click)="onDelete(contract.id)">Supprimer</button>
         </td>
       </tr>
     </tbody>
