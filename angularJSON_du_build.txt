@@ -1,4 +1,4 @@
-{
+Je vais te coller mon fichier mock-request.servicets . Tule réécrira en y ajutant des commentaires comme si c'était moi qi les avais écris. Tu corrigeras aussi l'indentation du code si besoin en suivant les bonne pratiques.{
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "newProjectRoot": "projects",
@@ -11,14 +11,21 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
             "outputPath": "dist/ng-materiels-ihm",
             "index": "src/index.html",
-            "main": "src/main.ts",
+            "browser": "src/main.ts",
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
-            "assets": ["src/favicon.ico", "src/assets", "src/index.html"],
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              },
+              "src/assets",
+              "src/index.html"
+            ],
             "styles": [
               "@angular/material/prebuilt-themes/azure-blue.css",
               "src/styles.css"
@@ -27,12 +34,6 @@
           },
           "configurations": {
             "production": {
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
-                }
-              ],
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
@@ -53,25 +54,22 @@
             },
             "development": {
               "optimization": false,
+              "outputHashing": "none",
               "sourceMap": true,
               "extractLicenses": false,
-              "namedChunks": true,
-              "outputHashing": "none"
+              "namedChunks": true
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "production"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
-          "options": {
-            "proxyConfig": "proxy.conf.json"
-          },
           "configurations": {
             "production": {
-              "buildTarget": "ngMaterielsIHM:build:production"
+              "browserTarget": "ngMaterielsIHM:build:production"
             },
             "development": {
-              "buildTarget": "ngMaterielsIHM:build:development"
+              "browserTarget": "ngMaterielsIHM:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -84,12 +82,17 @@
           "options": {
             "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "tsconfig.spec.json",
-            "assets": ["src/favicon.ico", "src/assets", "src/index.html"],
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              },
+              "src/assets",
+              "src/index.html"
+            ],
             "styles": [
               "@angular/material/prebuilt-themes/azure-blue.css",
-              "src/styles.css",
-              "src/app/contracts/contracts.component.css",
-              "src/app/app.component.css"
+              "src/styles.css"
             ],
             "scripts": []
           }

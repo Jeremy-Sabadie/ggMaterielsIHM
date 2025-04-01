@@ -1,15 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { Contract } from '../../app/models/Contract';
+import { Observable } from 'rxjs';
+import { Contract } from './models/Contract';
+
 
 @Injectable({
   providedIn: 'root',
 })
 export class ContractService {
-  // 🔄 Nouvelle URL relative avec proxy prefix
-  private baseUrl = '/api/contracts';
-
+  private baseUrl = 'http://85.215.130.154:3000/contracts';
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Contract[]> {
@@ -20,21 +19,15 @@ export class ContractService {
     return this.http.get<Contract>(`${this.baseUrl}/${id}`);
   }
 
-  create(contract: Omit<Contract, 'id'>): Observable<Contract> {
+  create(contract: Contract): Observable<Contract> {
     return this.http.post<Contract>(this.baseUrl, contract);
   }
 
   update(id: number, contract: Contract): Observable<Contract> {
-    if (id === undefined) {
-      return throwError(() => new Error('ID manquant pour la mise à jour.'));
-    }
     return this.http.put<Contract>(`${this.baseUrl}/${id}`, contract);
   }
 
   delete(id: number): Observable<void> {
-    if (id === undefined) {
-      return throwError(() => new Error('ID manquant pour la suppression.'));
-    }
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }

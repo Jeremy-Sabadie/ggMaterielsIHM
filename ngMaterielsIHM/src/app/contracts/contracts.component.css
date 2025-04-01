@@ -18,7 +18,7 @@
 }
 
 .btn-danger {
-  background: #e74c3c;
+  background: #c14739;
   /* Rouge */
   color: white;
 }
@@ -30,7 +30,7 @@ button:hover {
 }
 
 .btn-warning:hover {
-  background: #ff9800;
+  background: hsl(36, 90%, 64%);
   /* Orange foncé */
 }
 

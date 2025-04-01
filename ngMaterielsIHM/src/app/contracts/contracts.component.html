@@ -4,18 +4,23 @@
   <!-- ✅ Formulaire d'ajout / modification -->
   <form [formGroup]="contractForm" (ngSubmit)="onSubmit()">
     <div class="form-group">
-      <label for="name">Nom du Contrat</label>
-      <input id="name" formControlName="name" type="text" placeholder="Nom du contrat" required />
+      <label for="type">Type de contrat</label>
+      <input id="type" formControlName="type" type="text" placeholder="Ex: CDD, CDI..." required />
     </div>
 
     <div class="form-group">
-      <label for="start_date">Date de Début</label>
-      <input id="start_date" formControlName="start_date" type="date" required />
+      <label for="duration">Durée (mois)</label>
+      <input id="duration" formControlName="duration" type="number" min="1" required />
     </div>
 
     <div class="form-group">
-      <label for="end_date">Date de Fin</label>
-      <input id="end_date" formControlName="end_date" type="date" required />
+      <label for="startDate">Date de Début</label>
+      <input id="startDate" formControlName="startDate" type="date" required />
+    </div>
+
+    <div class="form-group">
+      <label for="endDate">Date de Fin</label>
+      <input id="endDate" formControlName="endDate" type="date" required />
     </div>
 
     <div class="button-group">
@@ -42,7 +47,8 @@
     <thead>
       <tr>
         <th>ID</th>
-        <th>Nom</th>
+        <th>Type</th>
+        <th>Durée</th>
         <th>Date de Début</th>
         <th>Date de Fin</th>
         <th>Actions</th>
@@ -51,12 +57,13 @@
     <tbody>
       <tr *ngFor="let contract of contracts">
         <td>{{ contract.id }}</td>
-        <td>{{ contract.name }}</td>
-        <td>{{ contract.start_date | date: 'dd/MM/yyyy' }}</td>
-        <td>{{ contract.end_date | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ contract.type }}</td>
+        <td>{{ contract.duration }} mois</td>
+        <td>{{ contract.startDate | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ contract.endDate | date: 'dd/MM/yyyy' }}</td>
         <td class="actions">
           <button class="btn-warning" (click)="onEdit(contract)">Modifier</button>
-          <button class="btn-danger" (click)="onDelete(contract.id)">Supprimer</button>
+          <button class="btn-danger" (click)="onDelete(contract.id!)">Supprimer</button>
         </td>
       </tr>
     </tbody>

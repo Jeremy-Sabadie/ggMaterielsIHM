@@ -1,59 +1,60 @@
 <div class="container">
   <h1>Gestion des Matériels</h1>
 
+  <!-- ✅ Formulaire -->
   <form [formGroup]="materielForm" (ngSubmit)="onSubmit()">
     <div class="form-group">
-      <label for="nom">Nom du Matériel</label>
-      <input id="nom" formControlName="nom" type="text" placeholder="Nom du matériel" />
+      <label for="name">Nom</label>
+      <input id="name" formControlName="name" type="text" placeholder="Nom" required />
     </div>
 
     <div class="form-group">
-      <label for="description">Description</label>
-      <input id="description" formControlName="description" type="text" placeholder="Description" />
+      <label for="endGarantee">Fin de garantie</label>
+      <input id="endGarantee" formControlName="endGarantee" type="date" required />
     </div>
 
     <div class="form-group">
-      <label for="serviceDat">Date de Mise en Service</label>
-      <input id="serviceDat" formControlName="serviceDat" type="date" />
+      <label for="lastUpdate">Dernière mise à jour</label>
+      <input id="lastUpdate" formControlName="lastUpdate" type="date" required />
     </div>
 
     <div class="form-group">
-      <label for="endGarantee">Date de Fin de Garantie</label>
-      <input id="endGarantee" formControlName="endGarantee" type="date" />
+      <label for="serviceDat">Date de mise en service</label>
+      <input id="serviceDat" formControlName="serviceDat" type="date" required />
     </div>
 
-    <div class="button-group">
-      <button type="submit" [class.btn-success]="!isEditMode" [class.btn-warning]="isEditMode"
-        [class.btn-disabled]="!isValidForm()" [disabled]="!isValidForm()">
-        {{ isEditMode ? 'Modifier' : 'Ajouter' }}
-      </button>
-      <button type="button" class="btn-info" (click)="resetForm()">Annuler</button>
+    <div class="form-group">
+      <label></label>
+<button type="button" (click)="onSubmit()" [ngClass]="isEditMode ? 'btn-warning' : 'btn-success'">
+  {{ isEditMode ? 'Modifier' : 'Ajouter' }}
+</button>
     </div>
   </form>
 
-  <table>
+  <!-- ✅ Tableau des matériels -->
+  <table *ngIf="materiels$ | async as materiels">
     <thead>
       <tr>
         <th>ID</th>
         <th>Nom</th>
-        <th>Description</th>
-        <th>Date de Mise en Service</th>
-        <th>Date de Fin de Garantie</th>
+        <th>Fin de garantie</th>
+        <th>Dernière mise à jour</th>
+        <th>Date de service</th>
+        <th>Propriétaire</th>
         <th>Actions</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let materiel of materiels$ | async">
+      <tr *ngFor="let materiel of materiels">
         <td>{{ materiel.id }}</td>
         <td>{{ materiel.name }}</td>
-        <td>{{ materiel.description }}</td>
-        <td>{{ materiel.serviceDat | date: 'dd/MM/yyyy' }}</td>
         <td>{{ materiel.endGarantee | date: 'dd/MM/yyyy' }}</td>
-        <td class="actions">
-          <div class="action-buttons">
-            <button class="btn-warning" (click)="onEdit(materiel)">Modifier</button>
-            <button class="btn-danger" (click)="onDelete(materiel.id)">Supprimer</button>
-          </div>
+        <td>{{ materiel.lastUpdate | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ materiel.serviceDat | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ materiel.proprietaire.name }}</td>
+        <td>
+          <button class="btn-warning" (click)="onEdit(materiel)">Modifier</button>
+          <button class="btn-danger" (click)="onDelete(materiel.id!)">Supprimer</button>
         </td>
       </tr>
     </tbody>

@@ -1,12 +1,56 @@
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
+/* ✅ Assurez-vous que tout prend la largeur complète de l'écran */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
-.card {
-  padding: 15px;
-  background: white;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+mat-sidenav-container {
+  width: 100vw;
+  /* 100% de la largeur de la fenêtre */
+  height: 100vh;
+  /* 100% de la hauteur de la fenêtre */
+}
+
+/* ✅ Le menu latéral doit prendre toute la hauteur */
+mat-sidenav {
+  width: 250px;
+  /* Taille standard */
+  height: 100%;
+  background: #f4f4f4;
+}
+
+/* ✅ Contenu principal (après le menu) */
+mat-sidenav-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background: #fff;
+}
+
+/* ✅ Toolbar (bandeau en haut) */
+mat-toolbar {
+  width: 100%;
+  z-index: 1000;
+}
+
+/* ✅ Assurez-vous que les boutons sont bien espacés */
+mat-nav-list button {
+  width: 100%;
+  text-align: left;
+}
+
+/* ✅ Contenu central */
+.content {
+  flex: 1;
+  padding: 20px;
+  overflow: auto;
+  width: 80%;
+}
+.menuBtn{
+  width:fit-content;
 }

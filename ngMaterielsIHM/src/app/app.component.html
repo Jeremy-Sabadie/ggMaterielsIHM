@@ -1,13 +1,14 @@
 <mat-sidenav-container class="container">
   <mat-sidenav #sidenav mode="side" opened>
-    <mat-toolbar>🖥️ Menu</mat-toolbar>
+    <mat-toolbar>🖥️ Menus</mat-toolbar>
     <mat-nav-list>
       <button mat-button (click)="goTo('/materiels')">Gérer les matériels 📦</button>
-      <button mat-button (click)="goTo('/contracts')"> Gérer les contrats 📜</button>
+      <button mat-button (click)="goTo('/contracts')">Gérer les contrats 📜</button>
     </mat-nav-list>
   </mat-sidenav>
 
   <mat-sidenav-content>
+    <!-- ✅ En-tête de l'application -->
     <mat-toolbar color="primary">
       <button mat-icon-button (click)="sidenav.toggle()">
         <mat-icon>menu</mat-icon>
@@ -15,6 +16,7 @@
       <span>Menu des gestions</span>
     </mat-toolbar>
 
+    <!-- ✅ Affichage des composants enfants via le routeur -->
     <main class="content">
       <router-outlet></router-outlet>
     </main>

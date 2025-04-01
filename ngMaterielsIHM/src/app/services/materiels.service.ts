@@ -1,45 +1,34 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
-export interface Materiel {
-  id: number;
-  name: string;
-  description: string;
-  serviceDat: string;
-  endGarantee: string;
-}
+import { Materiel } from '../../app/models/Materiel';
 
 @Injectable({
   providedIn: 'root',
 })
-export class MaterielsService {
-  private apiUrl = 'http://localhost:8080/materiels'; // 🔥 URL de ton API REST Spring Boot
+export class MaterielService {
+  // 🔄 Nouvelle URL relative avec proxy prefix
+  private baseUrl = '/api/materiels';
 
   constructor(private http: HttpClient) {}
 
-  /** ✅ Récupère la liste de tous les matériels */
-  getMateriels(): Observable<Materiel[]> {
-    return this.http.get<Materiel[]>(this.apiUrl);
+  getAll(): Observable<Materiel[]> {
+    return this.http.get<Materiel[]>(this.baseUrl);
   }
 
-  /** ✅ Récupère un matériel par son ID */
-  getMaterielById(id: number): Observable<Materiel> {
-    return this.http.get<Materiel>(`${this.apiUrl}/${id}`);
+  getById(id: number): Observable<Materiel> {
+    return this.http.get<Materiel>(`${this.baseUrl}/${id}`);
   }
 
-  /** ✅ Ajoute un matériel */
-  addMateriel(materiel: Materiel): Observable<Materiel> {
-    return this.http.post<Materiel>(this.apiUrl, materiel);
+  create(materiel: Materiel): Observable<Materiel> {
+    return this.http.post<Materiel>(this.baseUrl, materiel);
   }
 
-  /** ✅ Met à jour un matériel */
-  updateMateriel(materiel: Materiel): Observable<Materiel> {
-    return this.http.put<Materiel>(`${this.apiUrl}/${materiel.id}`, materiel);
+  update(id: number, materiel: Materiel): Observable<Materiel> {
+    return this.http.put<Materiel>(`${this.baseUrl}/${id}`, materiel);
   }
 
-  /** ✅ Supprime un matériel */
-  deleteMateriel(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }

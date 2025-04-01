@@ -1,0 +1,3 @@
+docker build -t cda07saba/angular-materiels-contrats:latest .
+
+docker push cda07saba/angular-materiels-contrats:latest
