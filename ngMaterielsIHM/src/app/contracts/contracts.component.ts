@@ -12,19 +12,25 @@ import Swal from 'sweetalert2';
 import { Contract } from '../../app/models/Contract';
 import { Entreprise } from '../../app/models/Entrprise';
 import { ContractService } from '../services/contracts.service';
+import { FormsModule } from '@angular/forms';
+import { AuthService } from '../auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-contracts',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule],
   templateUrl: './contracts.component.html',
   styleUrls: ['./contracts.component.css'],
 })
 export class ContractsComponent implements OnInit {
+  constructor(private auth: AuthService, private router: Router) {}
   contractForm!: FormGroup;
-  contracts$: Observable<Contract[]>;
+  contracts$: Observable<Contract[]> = new Observable<Contract[]>();
   isEditMode = false;
   currentEditedId?: number;
+  editedContract?: Contract;
+  searchId: number | null = null;
 
   private contractService = inject(ContractService);
 
@@ -34,39 +40,70 @@ export class ContractsComponent implements OnInit {
     tel: '0123456789',
   };
 
-  constructor() {
-    this.contracts$ = this.contractService.getAll();
-  }
-
   ngOnInit(): void {
     this.contractForm = new FormGroup({
-      duration: new FormControl('', [Validators.required, Validators.min(1)]),
       startDate: new FormControl('', Validators.required),
       endDate: new FormControl('', Validators.required),
       type: new FormControl('', Validators.required),
+      duration: new FormControl(
+        { value: '', disabled: true },
+        Validators.required
+      ),
     });
-
+    this.contractForm.get('startDate')?.valueChanges.subscribe(() => {
+      this.updateDurationFromDates();
+    });
+    this.contractForm.get('endDate')?.valueChanges.subscribe(() => {
+      this.updateDurationFromDates();
+    });
     this.loadContracts();
   }
+  private updateDurationFromDates(): void {
+    const start = new Date(this.contractForm.get('startDate')?.value);
+    const end = new Date(this.contractForm.get('endDate')?.value);
 
-  loadContracts() {
-    this.testGetAll();
+    if (start && end && end > start) {
+      const months =
+        (end.getFullYear() - start.getFullYear()) * 12 +
+        (end.getMonth() - start.getMonth());
+      this.contractForm.get('duration')?.setValue(months, { emitEvent: false });
+    }
+  }
+  loadContracts(): void {
     this.contracts$ = this.contractService.getAll();
   }
 
-  isValidForm(): boolean {
-    const start = this.contractForm.get('startDate')?.value;
-    const end = this.contractForm.get('endDate')?.value;
-    return this.contractForm.valid && new Date(end) > new Date(start);
-  }
-
-  onSubmit() {
+  onSubmit(): void {
     this.isEditMode ? this.onUpdate() : this.onAdd();
   }
 
-  onAdd() {
+  hasDateCoherence(): boolean {
+    const start = this.contractForm.get('startDate')?.value;
+    const end = this.contractForm.get('endDate')?.value;
+    return !!start && !!end && new Date(end) > new Date(start);
+  }
+  getButtonTooltip(): string {
     if (!this.isValidForm()) {
-      Swal.fire('Formulaire invalide', 'Vérifiez les champs.', 'warning');
+      return 'Veuillez remplir tous les champs et vous assurer que la date de fin est postérieure à la date de début.';
+    }
+    return '';
+  }
+  onAdd() {
+    if (!this.contractForm.valid) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Champs manquants',
+        text: 'Veuillez remplir tous les champs du formulaire.',
+      });
+      return;
+    }
+
+    if (!this.hasDateCoherence()) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Dates incohérentes',
+        text: 'La date de fin doit être postérieure à la date de début.',
+      });
       return;
     }
 
@@ -78,89 +115,166 @@ export class ContractsComponent implements OnInit {
       entreprise: this.currentEntreprise,
     };
 
-    this.contractService.create(newContract).subscribe(() => {
-      console.log(newContract);
-      Swal.fire('Ajout réussi', 'Le contrat a été créé.', 'success');
-      this.loadContracts();
-      this.resetForm();
+    this.contractService.create(newContract).subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Contrat créé',
+          text: 'Le contrat a été ajouté avec succès.',
+        });
+        this.loadContracts();
+        this.resetForm();
+      },
+      error: () => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur serveur',
+          text: 'Impossible de créer le contrat. Veuillez réessayer.',
+        });
+      },
     });
   }
 
-  onEdit(contract: Contract) {
+  onEdit(contract: Contract): void {
+    this.editedContract = contract;
+    this.currentEditedId = contract.id;
+    this.isEditMode = true;
+
     this.contractForm.setValue({
       duration: contract.duration,
       startDate: this.formatDate(contract.startDate),
       endDate: this.formatDate(contract.endDate),
       type: contract.type,
     });
-
-    this.isEditMode = true;
-    this.currentEditedId = contract.id;
   }
 
-  onUpdate() {
-    if (!this.currentEditedId || !this.isValidForm()) {
-      Swal.fire('Formulaire invalide', 'Vérifiez les champs.', 'warning');
+  onUpdate(): void {
+    if (
+      !this.contractForm.valid ||
+      !this.currentEditedId ||
+      !this.editedContract
+    ) {
+      Swal.fire(
+        'Erreur',
+        'Formulaire invalide ou contrat introuvable.',
+        'warning'
+      );
+      return;
+    }
+
+    if (!this.hasDateCoherence()) {
+      Swal.fire(
+        'Dates incohérentes',
+        'La date de fin doit être postérieure à la date de début.',
+        'error'
+      );
+      return;
+    }
+
+    if (!this.hasFormChanged(this.editedContract)) {
+      Swal.fire('Aucune modification', 'Aucun champ n’a été modifié.', 'info');
       return;
     }
 
     const updatedContract: Contract = {
       id: this.currentEditedId,
-      duration: this.contractForm.get('duration')?.value,
-      startDate: this.contractForm.get('startDate')?.value,
-      endDate: this.contractForm.get('endDate')?.value,
-      type: this.contractForm.get('type')?.value,
+      duration: this.contractForm.value.duration,
+      startDate: this.contractForm.value.startDate,
+      endDate: this.contractForm.value.endDate,
+      type: this.contractForm.value.type,
       entreprise: this.currentEntreprise,
     };
 
-    this.contractService
-      .update(this.currentEditedId, updatedContract)
-      .subscribe(() => {
-        Swal.fire(
-          'Modification réussie',
-          'Le contrat a été mis à jour.',
-          'success'
-        );
-        this.loadContracts();
-        this.resetForm();
-      });
-  }
-
-  onDelete(id?: number) {
-    if (!id) {
-      Swal.fire('Erreur', 'ID manquant.', 'error');
-      return;
-    }
-
-    this.contractService.delete(id).subscribe(() => {
-      Swal.fire('Suppression réussie', 'Le contrat a été supprimé.', 'success');
-      this.loadContracts();
+    Swal.fire({
+      title: 'Confirmer la mise à jour ?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Oui, modifier',
+    }).then((res) => {
+      if (res.isConfirmed) {
+        this.contractService
+          .update(this.currentEditedId!, updatedContract)
+          .subscribe(() => {
+            Swal.fire('Modifié', 'Le contrat a été mis à jour.', 'success');
+            this.loadContracts();
+            this.resetForm();
+          });
+      }
     });
   }
 
-  resetForm() {
+  resetForm(): void {
     this.contractForm.reset();
     this.isEditMode = false;
     this.currentEditedId = undefined;
+    this.editedContract = undefined;
   }
 
-  getButtonTooltip(): string {
-    return this.isValidForm() ? '' : 'Remplissez correctement les champs.';
+  formatDate(date: string | Date): string {
+    return new Date(date).toISOString().substring(0, 10);
   }
 
-  private formatDate(date: string | Date): string {
-    const d = new Date(date);
-    return d.toISOString().substring(0, 10);
+  hasFormChanged(contract: Contract): boolean {
+    return (
+      this.contractForm.get('duration')?.value !== contract.duration ||
+      this.contractForm.get('type')?.value !== contract.type ||
+      this.formatDate(this.contractForm.get('startDate')?.value) !==
+        this.formatDate(contract.startDate) ||
+      this.formatDate(this.contractForm.get('endDate')?.value) !==
+        this.formatDate(contract.endDate)
+    );
   }
-  testGetAll() {
-  this.contractService.getAll().subscribe({
-    next: (data) => {
-      console.log('📦 Contrats récupérés :', data);
-      alert(`✅ ${data.length} contrats récupérés. Voir console.`);
-    },
-    error: (err) => {
-      console.error('❌ Erreur lors du getAll() :', err);
-      alert('⛔ Erreur lors de la récupération des contrats.');
+
+  onDelete(id?: number): void {
+    if (!id) {
+      Swal.fire('Erreur', 'ID du contrat manquant.', 'error');
+      return;
     }
-  });
-}}
+
+    Swal.fire({
+      title: 'Confirmer la suppression ?',
+      text: 'Cette action est irréversible.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Oui, supprimer',
+      cancelButtonText: 'Annuler',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.contractService.delete(id).subscribe(() => {
+          Swal.fire('Supprimé', 'Le contrat a été supprimé.', 'success');
+          this.loadContracts();
+        });
+      }
+    });
+  }
+
+  searchById(): void {
+    if (!this.searchId) {
+      Swal.fire('Référence manquante', 'Entrez un ID de contrat.', 'warning');
+      return;
+    }
+
+    this.contractService.getById(this.searchId).subscribe({
+      next: (contract) => {
+        this.contracts$ = new Observable((observer) => {
+          observer.next([contract]);
+          observer.complete();
+        });
+      },
+      error: () => {
+        Swal.fire(
+          'Introuvable',
+          `Aucun contrat trouvé avec l’ID ${this.searchId}.`,
+          'info'
+        );
+        this.contracts$ = new Observable((observer) => {
+          observer.next([]);
+          observer.complete();
+        });
+      },
+    });
+  }
+  isValidForm(): boolean {
+    return this.contractForm.valid && this.hasDateCoherence();
+  }
+}

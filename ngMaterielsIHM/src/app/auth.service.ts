@@ -1,19 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, of } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { User } from './models/User';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/users'; // JSON Server URL
+  private apiUrl = 'http://localhost:3000/users';
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * Login : vérifie les credentials sur JSON Server
-   */
   login(email: string, password: string): Observable<User | null> {
     return this.http
       .get<User[]>(`${this.apiUrl}?email=${email}&password=${password}`)
@@ -30,33 +27,24 @@ export class AuthService {
       );
   }
 
-  /**
-   * Déconnexion : nettoyage du stockage local
-   */
   logout(): void {
     localStorage.removeItem('user');
   }
 
-  /**
-   * Récupère l'utilisateur actuellement connecté
-   */
   getCurrentUser(): User | null {
     const userJson = localStorage.getItem('user');
     return userJson ? (JSON.parse(userJson) as User) : null;
   }
 
-  /**
-   * Indique si un utilisateur est connecté
-   */
   isLoggedIn(): boolean {
     return !!this.getCurrentUser();
   }
 
-  /**
-   * Indique si l'utilisateur connecté est admin
-   */
   isAdmin(): boolean {
     const user = this.getCurrentUser();
     return user?.isAdmin === true;
+  }
+  signup(user: User): Observable<User> {
+    return this.http.post<User>('http://localhost:3000/users', user);
   }
 }

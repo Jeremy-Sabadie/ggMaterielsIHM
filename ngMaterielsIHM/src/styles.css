@@ -3,6 +3,9 @@
 html, body { height: 100em; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 /* ✅ Style général */
+body {
+  overflow-x: hidden;
+}
 .container {
   width: 100%;
   margin: auto;

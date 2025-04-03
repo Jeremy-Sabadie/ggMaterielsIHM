@@ -1,17 +1,20 @@
-<form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-  <div>
-    <label>Email</label>
-    <input type="email" formControlName="email" />
-  </div>
+<div class="login-container">
+  <h2>Connexion</h2>
 
-  <div>
-    <label>Mot de passe</label>
-    <input type="password" formControlName="password" />
-  </div>
+  <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input id="email" formControlName="email" type="email" required />
+    </div>
 
-  <button type="submit" [disabled]="loading">Se connecter</button>
+    <div class="form-group">
+      <label for="password">Mot de passe</label>
+      <input id="password" formControlName="password" type="password" required />
+    </div>
 
-  <div *ngIf="errorMessage" style="color: red;">
-    {{ errorMessage }}
-  </div>
-</form>
+    <div class="button-group">
+      <button type="submit" class="btn-success">Se connecter</button>
+      <button type="button" class="btn-secondary" (click)="goToSignup()">Créer un compte</button>
+    </div>
+  </form> <!-- ✅ manquait celle-ci -->
+</div>

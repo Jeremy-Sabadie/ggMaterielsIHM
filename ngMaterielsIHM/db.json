@@ -1,15 +1,31 @@
 {
   "users": [
     {
-      "id": 1,
+      "id": "1",
+      "name": "Admin",
       "email": "admin@example.com",
       "password": "admin123",
       "isAdmin": true
     },
     {
-      "id": 2,
-      "email": "user@example.com",
-      "password": "user123",
+      "id": 0,
+      "name": "toto",
+      "email": "gege@example.com",
+      "password": "tutu",
+      "isAdmin": false
+    },
+    {
+      "id": 0,
+      "name": "titi",
+      "email": "titi@example.com",
+      "password": "titi",
+      "isAdmin": false
+    },
+    {
+      "id": 0,
+      "name": "tata",
+      "email": "tata@example.com",
+      "password": "tata",
       "isAdmin": false
     }
   ]

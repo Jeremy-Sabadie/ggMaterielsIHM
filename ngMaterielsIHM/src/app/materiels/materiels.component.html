@@ -1,62 +1,83 @@
-<div class="container">
-  <h1>Gestion des Matériels</h1>
+<div class="container mt-4">
+  <button class="btn btn-outline-danger" (click)="logout()">
+    Se déconnecter
+  </button>
+  <h2 class="text-center mb-4">Gestion des Matériels</h2>
 
   <!-- ✅ Formulaire -->
-  <form [formGroup]="materielForm" (ngSubmit)="onSubmit()">
-    <div class="form-group">
-      <label for="name">Nom</label>
-      <input id="name" formControlName="name" type="text" placeholder="Nom" required />
-    </div>
+  <form [formGroup]="materielForm" (ngSubmit)="onSubmit()" class="mb-4">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label for="name" class="form-label">Nom</label>
+        <input id="name" formControlName="name" class="form-control" type="text" placeholder="Nom du matériel" />
+      </div>
 
-    <div class="form-group">
-      <label for="endGarantee">Fin de garantie</label>
-      <input id="endGarantee" formControlName="endGarantee" type="date" required />
-    </div>
+      <div class="col-md-6">
+        <label for="endGarantee" class="form-label">Fin de garantie</label>
+        <input id="endGarantee" formControlName="endGarantee" class="form-control" type="date" />
+      </div>
 
-    <div class="form-group">
-      <label for="lastUpdate">Dernière mise à jour</label>
-      <input id="lastUpdate" formControlName="lastUpdate" type="date" required />
-    </div>
+      <div class="col-md-6">
+        <label for="lastUpdate" class="form-label">Dernière mise à jour</label>
+        <input id="lastUpdate" formControlName="lastUpdate" class="form-control" type="date" />
+      </div>
 
-    <div class="form-group">
-      <label for="serviceDat">Date de mise en service</label>
-      <input id="serviceDat" formControlName="serviceDat" type="date" required />
-    </div>
+      <div class="col-md-6">
+        <label for="serviceDat" class="form-label">Date de mise en service</label>
+        <input id="serviceDat" formControlName="serviceDat" class="form-control" type="date" />
+      </div>
 
-    <div class="form-group">
-      <label></label>
-<button type="button" (click)="onSubmit()" [ngClass]="isEditMode ? 'btn-warning' : 'btn-success'">
-  {{ isEditMode ? 'Modifier' : 'Ajouter' }}
-</button>
+      <div class="col-12 d-flex gap-2 mt-2">
+        <button type="submit" class="btn btn-success" [disabled]="!isValidForm()" [title]="getButtonTooltip()">
+          {{ isEditMode ? 'Modifier' : 'Ajouter' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="resetForm()">Annuler</button>
+      </div>
     </div>
   </form>
 
-  <!-- ✅ Tableau des matériels -->
-  <table *ngIf="materiels$ | async as materiels">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Nom</th>
-        <th>Fin de garantie</th>
-        <th>Dernière mise à jour</th>
-        <th>Date de service</th>
-        <th>Propriétaire</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let materiel of materiels">
-        <td>{{ materiel.id }}</td>
-        <td>{{ materiel.name }}</td>
-        <td>{{ materiel.endGarantee | date: 'dd/MM/yyyy' }}</td>
-        <td>{{ materiel.lastUpdate | date: 'dd/MM/yyyy' }}</td>
-        <td>{{ materiel.serviceDat | date: 'dd/MM/yyyy' }}</td>
-        <td>{{ materiel.proprietaire.name }}</td>
-        <td>
-          <button class="btn-warning" (click)="onEdit(materiel)">Modifier</button>
-          <button class="btn-danger" (click)="onDelete(materiel.id!)">Supprimer</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <!-- ✅ Recherche par ID -->
+  <div class="search-container mb-4">
+    <div class="row">
+      <div class="col-md-6">
+        <label for="searchId" class="form-label">Numéro de référence</label>
+        <input id="searchId" type="number" [(ngModel)]="searchId" class="form-control" />
+      </div>
+      <div class="col-md-6 d-flex align-items-end gap-2 mt-2">
+        <button class="btn btn-info" (click)="searchById()">Rechercher</button>
+        <button class="btn btn-outline-secondary" (click)="loadMateriels()">Réinitialiser</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ Tableau -->
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Nom</th>
+          <th>Fin de garantie</th>
+          <th>Dernière MAJ</th>
+          <th>Mise en service</th>
+          <th>Propriétaire</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let materiel of materiels$ | async">
+          <td>{{ materiel.id }}</td>
+          <td>{{ materiel.name }}</td>
+          <td>{{ materiel.endGarantee | date: 'dd/MM/yyyy' }}</td>
+          <td>{{ materiel.lastUpdate | date: 'dd/MM/yyyy' }}</td>
+          <td>{{ materiel.serviceDat | date: 'dd/MM/yyyy' }}</td>
+          <td>{{ materiel.proprietaire.name }}</td>
+          <td class="d-flex flex-wrap gap-1 justify-content-center">
+            <button class="btn btn-sm btn-warning" (click)="onEdit(materiel)">Modifier</button>
+            <button class="btn btn-sm btn-danger" (click)="onDelete(materiel.id!)">Supprimer</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>

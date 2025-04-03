@@ -24,10 +24,13 @@
     </div>
 
     <div class="button-group">
-      <button type="submit" [ngClass]="isEditMode ? 'btn-warning' : 'btn-success'" [disabled]="!isValidForm()"
-        [title]="getButtonTooltip()">
-        {{ isEditMode ? 'Modifier' : 'Ajouter' }}
-      </button>
+  <button type="submit" [disabled]="!isValidForm()" [title]="getButtonTooltip()" [ngClass]="{
+      'btn-success': !isEditMode,
+      'btn-warning': isEditMode,
+      'btn-disabled': !isValidForm()
+    }">
+    {{ isEditMode ? 'Valider' : 'Ajouter' }}
+  </button>
       <button type="button" class="btn-info" (click)="resetForm()">Annuler</button>
     </div>
   </form>
@@ -41,7 +44,15 @@
   <p *ngIf="!(contracts$ | async)?.length" class="no-data">
     🚀 Aucun contrat trouvé !
   </p>
+<div class="search-container">
+  <label for="searchId">Référence du contrat</label>
+  <input id="searchId" type="number" [(ngModel)]="searchId" />
 
+  <div class="search-actions">
+    <button (click)="searchById()">Rechercher</button>
+    <button (click)="loadContracts()">Réinitialiser</button>
+  </div>
+</div>
   <!-- ✅ Tableau des contrats -->
   <table *ngIf="contracts$ | async as contracts">
     <thead>

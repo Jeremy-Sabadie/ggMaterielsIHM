@@ -38,3 +38,48 @@ button:hover {
   background: #c0392b;
   /* Rouge foncé */
 }
+.search-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.search-container label {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.search-container input[type="number"] {
+  padding: 8px;
+  font-size: 15px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+/* 🎛️ Boutons sous l'input */
+.search-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.search-actions button {
+  padding: 6px 12px;
+  font-size: 14px;
+  border: none;
+  border-radius: 5px;
+  background-color: #e0e0e0;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.search-actions button:hover {
+  background-color: #d5d5d5;
+}
+.btn-disabled {
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  pointer-events: none;
+  border: 1px solid #aaa;
+}

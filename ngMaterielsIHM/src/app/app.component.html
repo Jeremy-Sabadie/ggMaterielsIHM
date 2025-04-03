@@ -2,6 +2,9 @@
   <mat-sidenav #sidenav mode="side" opened>
     <mat-toolbar>🖥️ Menus</mat-toolbar>
     <mat-nav-list>
+      <button class="btn btn-outline-danger" (click)="logout()">
+        Se déconnecter
+      </button>
       <button mat-button (click)="goTo('/materiels')">Gérer les matériels 📦</button>
       <button mat-button (click)="goTo('/contracts')">Gérer les contrats 📜</button>
     </mat-nav-list>
